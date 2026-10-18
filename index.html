@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111827"><title>Controle de Contas</title>
+<style>
+:root{font-family:system-ui,sans-serif;color-scheme:dark;--bg:#101827;--card:#1e293b;--text:#f8fafc;--muted:#cbd5e1;--accent:#38bdf8}
+body.light{color-scheme:light;--bg:#f1f5f9;--card:white;--text:#0f172a;--muted:#475569;--accent:#0369a1}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--text);margin:0;padding:20px}main{max-width:760px;margin:auto}header,.row,.totals{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}h1{font-size:1.7rem}.card{background:var(--card);border-radius:16px;padding:18px;margin:14px 0}.totals>div{flex:1;min-width:145px}small{color:var(--muted)}strong{display:block;font-size:1.35rem;margin-top:8px}input,select,button{font:inherit;border-radius:9px;padding:11px;border:1px solid #64748b;background:var(--bg);color:var(--text)}button{cursor:pointer;background:var(--accent);color:#00111d;border:0;font-weight:700}button.secondary{background:transparent;color:var(--text);border:1px solid #64748b}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.form button{grid-column:1/-1}.entry{padding:12px 0;border-bottom:1px solid #64748b;display:flex;justify-content:space-between;gap:10px;align-items:center}.entry:last-child{border:0}.entry.paid .name{text-decoration:line-through;opacity:.65}.entry button{padding:7px}.entry label{display:flex;align-items:center;gap:7px}input[type=checkbox]{width:20px;height:20px}p{color:var(--muted)}.danger{color:#fca5a5!important}
+</style></head><body><main><header><h1>💳 Controle de Contas</h1><button class="secondary" id="theme">☀️ Modo claro</button></header>
+<section class="totals"><div class="card"><small>Recebido no mês</small><strong id="incomeTotal"></strong></div><div class="card"><small>Contas a pagar</small><strong id="pendingTotal"></strong></div><div class="card"><small>Saldo previsto</small><strong id="balance"></strong></div></section>
+<section class="card"><div class="row"><h2>Mês de referência</h2><input id="month" type="month"></div><p>Os lançamentos são guardados neste navegador. Contas fixas se repetem automaticamente nos meses seguintes.</p></section>
+<section class="card"><h2>Adicionar recebimento</h2><form id="incomeForm" class="form"><input id="incomeName" placeholder="Descrição (ex.: salário)" required maxlength="90"><input id="incomeValue" type="number" min="0.01" step="0.01" placeholder="Valor (R$)" required><button>Adicionar recebimento</button></form><div id="incomes"></div></section>
+<section class="card"><h2>Adicionar conta</h2><form id="billForm" class="form"><input id="billName" placeholder="Nome da conta" required maxlength="90"><input id="billValue" type="number" min="0.01" step="0.01" placeholder="Valor (R$)" required><select id="billType"><option value="fixed">Fixa (todo mês)</option><option value="variable">Variável (só este mês)</option></select><input id="billDue" type="number" min="1" max="31" placeholder="Dia de vencimento (opcional)"><button>Adicionar conta</button></form></section>
+<section class="card"><h2>Contas do mês</h2><div id="bills"></div></section>
+<section class="card"><h2>Backup</h2><div class="row"><button id="export" class="secondary">Exportar dados</button><label class="secondary">Importar backup <input id="import" type="file" accept="application/json"></label></div><p>Guarde um backup periodicamente. Os dados não sincronizam automaticamente entre aparelhos.</p></section>
+</main><script>
+const key='controle-contas-v1', $=id=>document.getElementById(id), money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+let data;try{data=JSON.parse(localStorage.getItem(key))||{bills:[],incomes:[],paid:{}}}catch{data={bills:[],incomes:[],paid:{}}}
+data.bills ||= [];data.incomes ||= [];data.paid ||= {};
+const now=new Date();$('month').value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+function save(){localStorage.setItem(key,JSON.stringify(data));render()}
+function el(tag,text){const e=document.createElement(tag);e.textContent=text;return e}
+function render(){
+const month=$('month').value, bills=data.bills.filter(b=>b.type==='fixed'?b.month<=month:b.month===month), inc=data.incomes.filter(i=>i.month===month);
+const paid=b=>!!data.paid[month+'|'+b.id], total=inc.reduce((s,i)=>s+i.value,0),pending=bills.filter(b=>!paid(b)).reduce((s,b)=>s+b.value,0);
+$('incomeTotal').textContent=money(total);$('pendingTotal').textContent=money(pending);$('balance').textContent=money(total-pending);
+$('incomes').replaceChildren();$('bills').replaceChildren();
+if(!inc.length)$('incomes').append(el('p','Nenhum recebimento neste mês.'));
+inc.forEach(i=>{const row=el('div','');row.className='entry';row.append(el('span',i.name+' — '+money(i.value)));const btn=el('button','Excluir');btn.className='secondary';btn.onclick=()=>{if(confirm('Excluir recebimento?')){data.incomes=data.incomes.filter(x=>x.id!==i.id);save()}};row.append(btn);$('incomes').append(row)});
+if(!bills.length)$('bills').append(el('p','Nenhuma conta cadastrada para este mês.'));
+bills.sort((a,b)=>(a.due||32)-(b.due||32)).forEach(b=>{const row=el('div','');row.className='entry'+(paid(b)?' paid':'');const label=el('label','');const cb=document.createElement('input');cb.type='checkbox';cb.checked=paid(b);cb.onchange=()=>{data.paid[month+'|'+b.id]=cb.checked;save()};const span=el('span',b.name+' — '+money(b.value)+' · '+(b.type==='fixed'?'Fixa':'Variável')+(b.due?' · Dia '+b.due:''));span.className='name';label.append(cb,span);row.append(label);const btn=el('button','Excluir');btn.className='secondary';btn.onclick=()=>{if(confirm(b.type==='fixed'?'Excluir esta conta fixa de todos os meses?':'Excluir esta conta?')){data.bills=data.bills.filter(x=>x.id!==b.id);save()}};row.append(btn);$('bills').append(row)})
+}
+$('incomeForm').onsubmit=e=>{e.preventDefault();data.incomes.push({id:crypto.randomUUID(),name:$('incomeName').value.trim(),value:Number($('incomeValue').value),month:$('month').value});e.target.reset();save()};
+$('billForm').onsubmit=e=>{e.preventDefault();data.bills.push({id:crypto.randomUUID(),name:$('billName').value.trim(),value:Number($('billValue').value),type:$('billType').value,due:Number($('billDue').value)||null,month:$('month').value});e.target.reset();save()};
+$('month').onchange=render;
+function theme(){document.body.classList.toggle('light',localStorage.getItem('contas-theme')==='light');$('theme').textContent=document.body.classList.contains('light')?'🌙 Modo escuro':'☀️ Modo claro'}theme();
+$('theme').onclick=()=>{localStorage.setItem('contas-theme',document.body.classList.contains('light')?'dark':'light');theme()};
+$('export').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='controle-contas-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+$('import').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());if(!Array.isArray(obj.bills)||!Array.isArray(obj.incomes)||typeof obj.paid!=='object')throw Error();if(confirm('Substituir os dados atuais pelo backup?')){data=obj;save()}}catch{alert('Arquivo de backup inválido.')}e.target.value=''};
+render();
+</script></body></html>
