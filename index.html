@@ -1,73 +1,44 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101827"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>Controle de Contas</title><link rel="apple-touch-icon" href="icone-controle-de-contas.png"><link rel="icon" type="image/png" href="icone-controle-de-contas.png">
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101827"><meta name="apple-mobile-web-app-capable" content="yes"><title>Controle de Contas</title><link rel="apple-touch-icon" href="icone-controle-de-contas.png">
 <style>
 :root{font-family:system-ui,sans-serif;color-scheme:dark;--bg:#101827;--card:#1e293b;--text:#f8fafc;--muted:#cbd5e1;--accent:#38bdf8}
-body.light{color-scheme:light;--bg:#f1f5f9;--card:white;--text:#0f172a;--muted:#475569;--accent:#0369a1}
-*{box-sizing:border-box}body{background:var(--bg);color:var(--text);margin:0;padding:20px}main{max-width:760px;margin:auto}header,.row,.totals{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}h1{font-size:1.7rem}.card{background:var(--card);border-radius:16px;padding:18px;margin:14px 0}.totals>div{flex:1;min-width:145px}small{color:var(--muted)}strong{display:block;font-size:1.35rem;margin-top:8px}input,select,button{font:inherit;border-radius:9px;padding:11px;border:1px solid #64748b;background:var(--bg);color:var(--text)}button{cursor:pointer;background:var(--accent);color:#00111d;border:0;font-weight:700}button.secondary{background:transparent;color:var(--text);border:1px solid #64748b}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.form button{grid-column:1/-1}.entry{padding:12px 0;border-bottom:1px solid #64748b;display:flex;justify-content:space-between;gap:10px;align-items:center}.entry:last-child{border:0}.entry.paid .name{text-decoration:line-through;opacity:.65}.entry button{padding:7px}.entry label{display:flex;align-items:center;gap:7px}input[type=checkbox]{width:20px;height:20px}p{color:var(--muted)}.danger{color:#fca5a5!important}
-
-/* Ajuste responsivo da área de backup */
-.backup-actions{display:flex;flex-direction:column;align-items:stretch;gap:12px;min-width:0}
-.backup-actions>button{width:100%}
-.backup-import{display:block;min-width:0;width:100%;overflow:hidden}
-.backup-import input[type=file]{display:block;width:100%;max-width:100%;min-width:0;margin-top:10px;font-size:14px}
-.card{min-width:0;max-width:100%}
-@media(max-width:480px){body{padding:12px}.card{padding:14px}.form{grid-template-columns:minmax(0,1fr)}}
- 
-/* Interface colorida e navegação inferior */
-html{scroll-behavior:smooth;scroll-padding-top:18px}
-body{padding-bottom:110px;background:linear-gradient(155deg,#0a1020,var(--bg) 48%) fixed}
-body.light{background:linear-gradient(155deg,#dbeafe,var(--bg) 48%) fixed}
-main{max-width:800px}
-header{padding:8px 0 4px}h1{letter-spacing:-.6px;font-size:clamp(1.3rem,4vw,1.85rem)}
-.brand-icon{display:inline-grid;place-items:center;background:#1d4ed8;border-radius:13px;width:43px;height:43px;margin-right:7px}
-.totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
-.totals .card{margin:0;min-width:0;padding:18px 14px;min-height:116px;box-shadow:0 8px 22px #0002}
-.stat small{color:#fff;font-weight:650;font-size:.9rem}.stat strong{color:#fff;font-size:clamp(1.05rem,3.6vw,1.5rem);overflow-wrap:anywhere}
-.stat.green{background:linear-gradient(135deg,#059669,#047857)}
-.stat.red{background:linear-gradient(135deg,#dc2626,#991b1b)}
-.stat.orange{background:linear-gradient(135deg,#ea580c,#c2410c)}
-.stat.blue{background:linear-gradient(135deg,#2563eb,#1d4ed8)}
-.pending-strip{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--card);padding:12px 16px;border-radius:12px;font-size:.9rem}
-.pending-strip strong{margin:0;font-size:1.05rem}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:3px;background:#111d34f5;box-shadow:0 -8px 28px #0004;padding:10px max(8px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom));z-index:10}
-.bottom-nav a{color:#dbeafe;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;min-width:0;flex:1;max-width:160px}
-.bottom-nav span{font-size:24px;color:#60a5fa}
-body.light .bottom-nav{background:#e2e8f0f5}body.light .bottom-nav a{color:#1e293b}
-.entry{min-width:0}.entry label{min-width:0;overflow-wrap:anywhere}.entry button{flex-shrink:0}
-@media(max-width:420px){.stat small{font-size:.78rem}.totals .card{padding:15px 11px}.entry{align-items:flex-start}.entry label{flex:1}}
-</style></head><body><main><header><h1><span class="brand-icon">💳</span> Controle de Contas</h1><button class="secondary" id="theme">☀️ Modo claro</button></header>
-<section class="totals" id="resumo">
-<div class="card stat green"><small>↗ Recebimentos</small><strong id="incomeTotal"></strong></div>
-<div class="card stat red"><small>▣ Contas fixas</small><strong id="fixedTotal"></strong></div>
-<div class="card stat orange"><small>◈ Despesas variáveis</small><strong id="variableTotal"></strong></div>
-<div class="card stat blue"><small>◉ Saldo previsto</small><strong id="balance"></strong></div>
-</section><div class="pending-strip">⏳ Total ainda a pagar: <strong id="pendingTotal"></strong></div>
+body.light{color-scheme:light;--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#475569;--accent:#0369a1}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{background:linear-gradient(155deg,#0a1020,var(--bg) 48%) fixed;color:var(--text);margin:0;padding:16px 16px 110px}body.light{background:linear-gradient(155deg,#dbeafe,var(--bg) 48%) fixed}main{max-width:800px;margin:auto}header,.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}h1{font-size:clamp(1.3rem,4vw,1.85rem)}h2{font-size:1.2rem}.brand-icon{display:inline-grid;place-items:center;background:#1d4ed8;border-radius:13px;width:43px;height:43px;margin-right:7px}.card{background:var(--card);border-radius:16px;padding:18px;margin:14px 0;min-width:0}.totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}.totals .card{margin:0;padding:18px 14px;min-height:116px}.stat small{color:#fff;font-weight:650}.stat strong{display:block;color:#fff;font-size:clamp(1.05rem,3.6vw,1.5rem);margin-top:8px;overflow-wrap:anywhere}.green{background:linear-gradient(135deg,#059669,#047857)}.red{background:linear-gradient(135deg,#dc2626,#991b1b)}.orange{background:linear-gradient(135deg,#ea580c,#c2410c)}.blue{background:linear-gradient(135deg,#2563eb,#1d4ed8)}.pending-strip{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--card);padding:12px 16px;border-radius:12px}.pending-strip strong{font-size:1.05rem}input,select,button{font:inherit;border-radius:9px;padding:11px;border:1px solid #64748b;background:var(--bg);color:var(--text);max-width:100%}button{cursor:pointer;background:var(--accent);color:#00111d;border:0;font-weight:700}button.secondary{background:transparent;color:var(--text);border:1px solid #64748b}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.form button{grid-column:1/-1}.entry{padding:12px 0;border-bottom:1px solid #64748b;display:flex;justify-content:space-between;gap:10px;align-items:center}.entry:last-child{border:0}.entry.paid .name{text-decoration:line-through;opacity:.65}.entry label{display:flex;align-items:center;gap:7px;min-width:0;overflow-wrap:anywhere}.entry .actions{display:flex;gap:6px;flex-shrink:0}.entry button{padding:7px;font-size:.86rem}input[type=checkbox]{width:20px;height:20px;flex-shrink:0}p,small{color:var(--muted)}.backup-actions{display:flex;flex-direction:column;gap:12px}.backup-actions>button{width:100%}.backup-actions input[type=file]{display:block;width:100%;margin-top:10px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:3px;background:#111d34f5;box-shadow:0 -8px 28px #0004;padding:10px 8px calc(10px + env(safe-area-inset-bottom));z-index:10}.bottom-nav a{color:#dbeafe;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;flex:1;max-width:160px}.bottom-nav span{font-size:24px;color:#60a5fa}body.light .bottom-nav{background:#e2e8f0f5}body.light .bottom-nav a{color:#1e293b}dialog{background:var(--card);color:var(--text);border:1px solid #64748b;border-radius:16px;width:min(94vw,440px);padding:20px}dialog::backdrop{background:#0009}dialog .form{grid-template-columns:1fr}dialog menu{padding:0;display:flex;gap:10px;justify-content:flex-end}@media(max-width:480px){body{padding:12px 12px 110px}.card{padding:14px}.form{grid-template-columns:1fr}.entry{align-items:flex-start}.entry label{flex:1}.entry .actions{flex-direction:column}.stat small{font-size:.78rem}}
+</style></head><body><main>
+<header><h1><span class="brand-icon">💳</span> Controle de Contas</h1><button class="secondary" id="theme">☀️ Modo claro</button></header>
+<section class="totals" id="resumo"><div class="card stat green"><small>↗ Recebimentos</small><strong id="incomeTotal"></strong></div><div class="card stat red"><small>▣ Contas fixas</small><strong id="fixedTotal"></strong></div><div class="card stat orange"><small>◈ Despesas variáveis</small><strong id="variableTotal"></strong></div><div class="card stat blue"><small>◉ Saldo previsto</small><strong id="balance"></strong></div></section>
+<div class="pending-strip">⏳ Total ainda a pagar: <strong id="pendingTotal"></strong></div>
 <section class="card"><div class="row"><h2>Mês de referência</h2><input id="month" type="month"></div><p>Os lançamentos são guardados neste navegador. Contas fixas se repetem automaticamente nos meses seguintes.</p></section>
 <section class="card" id="recebimentos"><h2>↗ Adicionar recebimento</h2><form id="incomeForm" class="form"><input id="incomeName" placeholder="Descrição (ex.: salário)" required maxlength="90"><input id="incomeValue" type="number" min="0.01" step="0.01" placeholder="Valor (R$)" required><button>Adicionar recebimento</button></form><div id="incomes"></div></section>
 <section class="card" id="contas-fixas"><h2>▣ Adicionar conta</h2><form id="billForm" class="form"><input id="billName" placeholder="Nome da conta" required maxlength="90"><input id="billValue" type="number" min="0.01" step="0.01" placeholder="Valor (R$)" required><select id="billType"><option value="fixed">Fixa (todo mês)</option><option value="variable">Variável (só este mês)</option></select><input id="billDue" type="number" min="1" max="31" placeholder="Dia de vencimento (opcional)"><button>Adicionar conta</button></form></section>
 <section class="card" id="despesas"><h2>◈ Contas do mês</h2><div id="bills"></div></section>
-<section class="card" id="backup"><h2>☁ Backup</h2><div class="backup-actions"><button id="export" class="secondary">Exportar dados</button><label class="backup-import">Importar backup <input id="import" type="file" accept="application/json"></label></div><p>Guarde um backup periodicamente. Os dados não sincronizam automaticamente entre aparelhos.</p></section>
-<nav class="bottom-nav" aria-label="Navegação principal">
-<a href="#recebimentos"><span>↗</span>Recebimentos</a>
-<a href="#contas-fixas"><span>▣</span>Contas fixas</a>
-<a href="#despesas"><span>◈</span>Despesas</a>
-<a href="#resumo"><span>◉</span>Resumo</a>
-</nav></main><script>
-const key='controle-contas-v1', $=id=>document.getElementById(id), money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+<section class="card" id="backup"><h2>☁ Backup</h2><div class="backup-actions"><button id="export" class="secondary">Exportar dados</button><label>Importar backup <input id="import" type="file" accept="application/json"></label></div><p>Guarde um backup periodicamente. Os dados não sincronizam automaticamente entre aparelhos.</p></section>
+<nav class="bottom-nav" aria-label="Navegação principal"><a href="#recebimentos"><span>↗</span>Recebimentos</a><a href="#contas-fixas"><span>▣</span>Contas fixas</a><a href="#despesas"><span>◈</span>Despesas</a><a href="#resumo"><span>◉</span>Resumo</a></nav>
+</main>
+<dialog id="editor"><h2>Editar lançamento</h2><form id="editForm" class="form"><input id="editName" required maxlength="90" aria-label="Descrição"><input id="editValue" type="number" min="0.01" step="0.01" required aria-label="Valor"><select id="editType"><option value="fixed">Fixa (todo mês)</option><option value="variable">Variável (só este mês)</option></select><input id="editDue" type="number" min="1" max="31" placeholder="Dia de vencimento (opcional)"><menu><button type="button" class="secondary" id="cancelEdit">Cancelar</button><button type="submit">Salvar alterações</button></menu></form></dialog>
+<script>
+const key='controle-contas-v1',$=id=>document.getElementById(id),money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 let data;try{data=JSON.parse(localStorage.getItem(key))||{bills:[],incomes:[],paid:{}}}catch{data={bills:[],incomes:[],paid:{}}}
 data.bills ||= [];data.incomes ||= [];data.paid ||= {};
 const now=new Date();$('month').value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
 function save(){localStorage.setItem(key,JSON.stringify(data));render()}
 function el(tag,text){const e=document.createElement(tag);e.textContent=text;return e}
+function action(label,fn){const b=el('button',label);b.type='button';b.className='secondary';b.onclick=fn;return b}
+let editing=null;
+function edit(kind,id){const item=(kind==='income'?data.incomes:data.bills).find(x=>x.id===id);if(!item)return;editing={kind,id};$('editName').value=item.name;$('editValue').value=item.value;$('editType').value=item.type||'fixed';$('editDue').value=item.due||'';$('editType').hidden=kind==='income';$('editDue').hidden=kind==='income';$('editor').showModal()}
+$('cancelEdit').onclick=()=>$('editor').close();
+$('editor').addEventListener('close',()=>{editing=null});
+$('editForm').onsubmit=e=>{e.preventDefault();if(!editing)return;const item=(editing.kind==='income'?data.incomes:data.bills).find(x=>x.id===editing.id);if(!item)return;const name=$('editName').value.trim(),value=Number($('editValue').value);if(!name||!Number.isFinite(value)||value<=0)return alert('Informe uma descrição e um valor válido.');item.name=name;item.value=value;if(editing.kind==='bill'){item.type=$('editType').value;item.due=Number($('editDue').value)||null;}$('editor').close();save()};
 function render(){
-const month=$('month').value, bills=data.bills.filter(b=>b.type==='fixed'?b.month<=month:b.month===month), inc=data.incomes.filter(i=>i.month===month);
-const paid=b=>!!data.paid[month+'|'+b.id], total=inc.reduce((s,i)=>s+i.value,0),pending=bills.filter(b=>!paid(b)).reduce((s,b)=>s+b.value,0);
-const fixed=bills.filter(b=>b.type==='fixed').reduce((s,b)=>s+b.value,0), variable=bills.filter(b=>b.type==='variable').reduce((s,b)=>s+b.value,0);$('incomeTotal').textContent=money(total);$('fixedTotal').textContent=money(fixed);$('variableTotal').textContent=money(variable);$('pendingTotal').textContent=money(pending);$('balance').textContent=money(total-pending);
+const month=$('month').value,bills=data.bills.filter(b=>b.type==='fixed'?b.month<=month:b.month===month),inc=data.incomes.filter(i=>i.month===month);
+const paid=b=>!!data.paid[month+'|'+b.id],total=inc.reduce((s,i)=>s+Number(i.value),0),pending=bills.filter(b=>!paid(b)).reduce((s,b)=>s+Number(b.value),0);
+const fixed=bills.filter(b=>b.type==='fixed').reduce((s,b)=>s+Number(b.value),0),variable=bills.filter(b=>b.type==='variable').reduce((s,b)=>s+Number(b.value),0);
+$('incomeTotal').textContent=money(total);$('fixedTotal').textContent=money(fixed);$('variableTotal').textContent=money(variable);$('pendingTotal').textContent=money(pending);$('balance').textContent=money(total-pending);
 $('incomes').replaceChildren();$('bills').replaceChildren();
 if(!inc.length)$('incomes').append(el('p','Nenhum recebimento neste mês.'));
-inc.forEach(i=>{const row=el('div','');row.className='entry';row.append(el('span',i.name+' — '+money(i.value)));const btn=el('button','Excluir');btn.className='secondary';btn.onclick=()=>{if(confirm('Excluir recebimento?')){data.incomes=data.incomes.filter(x=>x.id!==i.id);save()}};row.append(btn);$('incomes').append(row)});
+inc.forEach(i=>{const row=el('div','');row.className='entry';row.append(el('span',i.name+' — '+money(i.value)));const actions=el('div','');actions.className='actions';actions.append(action('✏️ Editar',()=>edit('income',i.id)),action('Excluir',()=>{if(confirm('Excluir recebimento?')){data.incomes=data.incomes.filter(x=>x.id!==i.id);save()}}));row.append(actions);$('incomes').append(row)});
 if(!bills.length)$('bills').append(el('p','Nenhuma conta cadastrada para este mês.'));
-bills.sort((a,b)=>(a.due||32)-(b.due||32)).forEach(b=>{const row=el('div','');row.className='entry'+(paid(b)?' paid':'');const label=el('label','');const cb=document.createElement('input');cb.type='checkbox';cb.checked=paid(b);cb.onchange=()=>{data.paid[month+'|'+b.id]=cb.checked;save()};const span=el('span',b.name+' — '+money(b.value)+' · '+(b.type==='fixed'?'Fixa':'Variável')+(b.due?' · Dia '+b.due:''));span.className='name';label.append(cb,span);row.append(label);const btn=el('button','Excluir');btn.className='secondary';btn.onclick=()=>{if(confirm(b.type==='fixed'?'Excluir esta conta fixa de todos os meses?':'Excluir esta conta?')){data.bills=data.bills.filter(x=>x.id!==b.id);save()}};row.append(btn);$('bills').append(row)})
+bills.sort((a,b)=>(a.due||32)-(b.due||32)).forEach(b=>{const row=el('div','');row.className='entry'+(paid(b)?' paid':'');const label=el('label','');const cb=document.createElement('input');cb.type='checkbox';cb.checked=paid(b);cb.onchange=()=>{data.paid[month+'|'+b.id]=cb.checked;save()};const span=el('span',b.name+' — '+money(b.value)+' · '+(b.type==='fixed'?'Fixa':'Variável')+(b.due?' · Dia '+b.due:''));span.className='name';label.append(cb,span);row.append(label);const actions=el('div','');actions.className='actions';actions.append(action('✏️ Editar',()=>edit('bill',b.id)),action('Excluir',()=>{if(confirm(b.type==='fixed'?'Excluir esta conta fixa de todos os meses?':'Excluir esta conta?')){data.bills=data.bills.filter(x=>x.id!==b.id);save()}}));row.append(actions);$('bills').append(row)})
 }
 $('incomeForm').onsubmit=e=>{e.preventDefault();data.incomes.push({id:crypto.randomUUID(),name:$('incomeName').value.trim(),value:Number($('incomeValue').value),month:$('month').value});e.target.reset();save()};
 $('billForm').onsubmit=e=>{e.preventDefault();data.bills.push({id:crypto.randomUUID(),name:$('billName').value.trim(),value:Number($('billValue').value),type:$('billType').value,due:Number($('billDue').value)||null,month:$('month').value});e.target.reset();save()};
@@ -75,6 +46,6 @@ $('month').onchange=render;
 function theme(){document.body.classList.toggle('light',localStorage.getItem('contas-theme')==='light');$('theme').textContent=document.body.classList.contains('light')?'🌙 Modo escuro':'☀️ Modo claro'}theme();
 $('theme').onclick=()=>{localStorage.setItem('contas-theme',document.body.classList.contains('light')?'dark':'light');theme()};
 $('export').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='controle-contas-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
-$('import').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());if(!Array.isArray(obj.bills)||!Array.isArray(obj.incomes)||typeof obj.paid!=='object')throw Error();if(confirm('Substituir os dados atuais pelo backup?')){data=obj;save()}}catch{alert('Arquivo de backup inválido.')}e.target.value=''};
+$('import').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());if(!Array.isArray(obj.bills)||!Array.isArray(obj.incomes)||!obj.paid||typeof obj.paid!=='object')throw Error();if(confirm('Substituir os dados atuais pelo backup?')){data=obj;save()}}catch{alert('Arquivo de backup inválido.')}e.target.value=''};
 render();
 </script></body></html>
